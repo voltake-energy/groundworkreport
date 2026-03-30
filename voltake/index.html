@@ -1154,9 +1154,22 @@
             if(el) {
                 if (inputId === 'f_date' && value) {
                     try {
-                        const d = new Date(value);
-                        value = d.toISOString().split('T')[0];
-                    } catch(e) {}
+                        // Semak dan pastikan timezone adalah GMT+8 (Malaysia/Singapore)
+                        if (typeof value === 'string' && value.length === 10 && value.includes('-')) {
+                            // Format sudah YYYY-MM-DD, tidak perlu diubah
+                        } else {
+                            const d = new Date(value);
+                            if (!isNaN(d.getTime())) {
+                                const tzDate = new Date(d.toLocaleString("en-US", {timeZone: "Asia/Kuala_Lumpur"}));
+                                const yyyy = tzDate.getFullYear();
+                                const mm = String(tzDate.getMonth() + 1).padStart(2, '0');
+                                const dd = String(tzDate.getDate()).padStart(2, '0');
+                                value = `${yyyy}-${mm}-${dd}`;
+                            }
+                        }
+                    } catch(e) {
+                        console.error("Date parsing error", e);
+                    }
                 }
                 el.value = value || '';
                 const event = new Event('input', { bubbles: true });
