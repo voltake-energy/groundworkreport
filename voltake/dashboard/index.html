@@ -467,6 +467,7 @@
     <script>
         // Data Source
         const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQGvo9FEp4l0WBLzjkJz9gk1PydcH386kxq2Qe3PodZzuh69de4GhXowe32nxkfme6L2d-nPtWI-u9i/pub?output=csv';
+        const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlZBbQrz0Jk0rr7q-7kwN0MkPVYeEuyyuQrW8WVeDQiceVYSUFjy3AXgTFDexykS1dag/exec';
         
         // Global State
         let globalData = [];
@@ -1024,6 +1025,36 @@
         return cleaned;
     }
 
+    // Fungsi Salin (Copy to Clipboard) serasi Iframe
+    function copyToClipboard(text, btnElement) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; // Elak skrin dari scroll
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            if (btnElement) {
+                const originalHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<i class="fa-solid fa-check mr-1 text-emerald-500"></i> Berjaya Salin';
+                btnElement.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                btnElement.classList.remove('bg-slate-100', 'text-slate-600', 'border-slate-200');
+                
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+                    btnElement.classList.add('bg-slate-100', 'text-slate-600', 'border-slate-200');
+                }, 2500);
+            }
+        } catch (err) {
+            console.error('Gagal untuk salin URL', err);
+            showError('Gagal menyalin URL. Sila cuba lagi.');
+        }
+        document.body.removeChild(textArea);
+    }
+
     // ----- RENDER DOCUMENTS -----
     function renderDocuments(data) {
         const tbody = document.getElementById('document-table-body');
@@ -1046,23 +1077,53 @@
             const waPhone = formatPhoneForWa(rawPhone);
             const emailAddr = row.ClientEmail || '';
             
+            const docDate = row.Date || 'Tarikh Tidak Dinyatakan';
+            const docTime = row.TimeOut || row.TimeIn || 'Masa Tidak Dinyatakan';
+            const approvalUrl = row.ApprovalToken ? `${APP_SCRIPT_URL}?token=${row.ApprovalToken.trim()}` : '';
+
             let subject = '';
             let bodyMsg = '';
+            let waBodyMsg = '';
 
             if (isApproved) {
                 subject = `GWR Selesai - ${row.ReportID}`;
                 bodyMsg = `Hi ${clientName},\n\nTerima kasih kerana telah menyemak dan menandatangani GWR untuk projek ${projectName}.\n\nAnda boleh merujuk salinan akhir kerja anda.\n\nTerima kasih dari Voltake.`;
+                waBodyMsg = bodyMsg;
             } else {
                 subject = `Tindakan Diperlukan: GWR Belum Ditandatangani - ${row.ReportID}`;
-                bodyMsg = `Hi ${clientName},\n\nSila maklum bahawa anda masih tidak lagi selesai menandatangani GWR untuk projek ${projectName}. Sila semak draf laporan terkini dan berikan kelulusan anda supaya kami dapat memproses dokumen akhir.\n\nTerima kasih dari Voltake.`;
+                bodyMsg = `Hi ${clientName},\n\nSila maklum bahawa anda masih tidak lagi selesai menandatangani GWR untuk projek ${projectName}. Sila semak draf laporan terkini dan berikan kelulusan anda supaya kami dapat memproses dokumen akhir.\n\nSila klik link ini untuk meluluskan: ${approvalUrl}\n\nTerima kasih dari Voltake.`;
+                
+                // Mesej Custom WhatsApp untuk Pending Sign
+                waBodyMsg = `Berikut merupakan Ground Work Report Form | ${docDate} | ${docTime}\nSila tekan link di bawah untuk approve kerja hari ini\n\n${approvalUrl}\n\nVOLTAKE TEAM`;
             }
 
             // URL Encode for mailto and wa.me
             const encodedSubject = encodeURIComponent(subject);
             const encodedBody = encodeURIComponent(bodyMsg);
+            const encodedWaBody = encodeURIComponent(waBodyMsg);
             
             const mailtoLink = `mailto:${emailAddr}?subject=${encodedSubject}&body=${encodedBody}`;
-            const waLink = waPhone ? `https://wa.me/${waPhone}?text=${encodedBody}` : '#';
+            const waLink = waPhone ? `https://wa.me/${waPhone}?text=${encodedWaBody}` : '#';
+
+            // HTML Approval Status
+            let approvalStatusHtml = '';
+            if (isApproved) {
+                approvalStatusHtml = `
+                    <span class="flex items-center text-emerald-600 text-sm font-medium"><i class="fa-solid fa-check-circle mr-1.5"></i> Client Signed</span>
+                    <div class="text-[10px] text-slate-400 font-mono mt-1 break-all" style="max-width: 150px;">Token: ${row.ApprovalToken || 'N/A'}</div>
+                `;
+            } else {
+                approvalStatusHtml = `
+                    <span class="flex items-center text-amber-500 text-sm font-medium"><i class="fa-regular fa-clock mr-1.5"></i> Pending Sign</span>
+                    ${row.ApprovalToken ? `
+                    <div class="mt-2">
+                        <button onclick="copyToClipboard('${approvalUrl}', this)" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-1 px-2 rounded border border-slate-200 transition flex items-center w-max cursor-pointer" title="Salin URL Kelulusan">
+                            <i class="fa-regular fa-copy mr-1"></i> Salin Link Approval
+                        </button>
+                    </div>
+                    ` : `<div class="text-[10px] text-slate-400 mt-1 italic">Tiada Token</div>`}
+                `;
+            }
 
             tbody.innerHTML += `
                 <tr class="hover:bg-slate-50 border-b border-slate-50 transition">
@@ -1080,10 +1141,7 @@
                             : `<span class="text-xs text-slate-400 italic">No Draft</span>`}
                     </td>
                     <td class="px-6 py-4">
-                        ${isApproved 
-                            ? `<span class="flex items-center text-emerald-600 text-sm font-medium"><i class="fa-solid fa-check-circle mr-1.5"></i> Client Signed</span>`
-                            : `<span class="flex items-center text-amber-500 text-sm font-medium"><i class="fa-regular fa-clock mr-1.5"></i> Pending Sign</span>`}
-                        <div class="text-[10px] text-slate-400 font-mono mt-1 break-all" style="max-width: 150px;">Token: ${row.ApprovalToken || 'N/A'}</div>
+                        ${approvalStatusHtml}
                     </td>
                     <td class="px-6 py-4">
                         ${hasFinal 
