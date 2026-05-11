@@ -892,7 +892,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwlZBbQrz0Jk0rr7q-7kwN0MkPVYeEuyyuQrW8WVeDQiceVYSUFjy3AXgTFDexykS1dag/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw51fpXWpPHpYOBIDQcxu2vpq0896wm2oApIdldsq9hcc-83q4qLncBnh97jRLxgmFF7g/exec"; 
 
         // ==========================================
         // TECH LOADER FUNCTIONS
@@ -1454,6 +1454,24 @@
         }
 
         // ==========================================
+        // FUNGSI NAMA FAIL DINAMIK (LOCATION_CLIENT_TARIKH)
+        // ==========================================
+        function getDynamicFileName(type) {
+            let loc = document.getElementById('f_loc').value.split(',')[0].trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+            let client = document.getElementById('f_client').value.trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
+            let dateVal = document.getElementById('f_date').value;
+            let d = '';
+            if (dateVal) {
+                let parts = dateVal.split('-');
+                if (parts.length === 3) d = parts[2] + parts[1] + parts[0];
+            }
+            loc = loc || 'Location';
+            client = client || 'Client';
+            d = d || 'Date';
+            return `${loc}_${client}_${d}_${type}.pdf`;
+        }
+
+        // ==========================================
         // GENERATE PDF 
         // ==========================================
         function generatePDF() {
@@ -1473,8 +1491,10 @@
             
             element.style.gap = '0px'; element.style.transform = 'none'; element.style.marginBottom = '0px';
 
+            const dynamicName = getDynamicFileName('Draft');
+
             const opt = {
-                margin: 0, filename: 'Laporan_Kerja_Voltake.pdf', image: { type: 'jpeg', quality: 0.98 },
+                margin: 0, filename: dynamicName, image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
@@ -1521,8 +1541,10 @@
             });
             element.style.gap = '0px'; element.style.transform = 'none'; element.style.marginBottom = '0px';
 
+            const dynamicName = getDynamicFileName('Draft');
+
             const opt = {
-                margin: 0, filename: 'Laporan_Kerja_Voltake.pdf', image: { type: 'jpeg', quality: 0.98 },
+                margin: 0, filename: dynamicName, image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
