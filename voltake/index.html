@@ -592,13 +592,14 @@
                 </div>
             </div>
 
-            <!-- Time In Out -->
+            <!-- Time In Out (DIKEMASKINI KE DATETIME) -->
             <div class="input-group">
-                <label>Time In / Out</label>
-                <div style="display:flex; gap:5px;">
-                    <input type="time" id="f_in" oninput="update('v_in', this.value)">
-                    <input type="time" id="f_out" oninput="update('v_out', this.value)">
-                </div>
+                <label>Time In (Tarikh & Masa)</label>
+                <input type="datetime-local" id="f_in" oninput="updateTimeIO('in')">
+            </div>
+            <div class="input-group">
+                <label>Time Out (Tarikh & Masa)</label>
+                <input type="datetime-local" id="f_out" oninput="updateTimeIO('out')">
             </div>
 
             <hr style="margin: 15px 0;">
@@ -616,9 +617,14 @@
                 <label>Unresolved Issue & Action</label>
                 <textarea id="f_issue" rows="4" oninput="update('v_issue', this.value)"></textarea>
             </div>
+            
+            <!-- MANPOWER / PAX (DIKEMASKINI DARI REMARKS) -->
             <div class="input-group">
-                <label>Remarks</label>
-                <textarea id="f_remark" rows="2" oninput="update('v_remark', this.value)"></textarea>
+                <label>Manpower (Berapa pax & Nama)</label>
+                <div style="display:flex; gap:5px;">
+                    <input type="number" id="f_pax_count" placeholder="Pax" style="width: 25%;" oninput="updatePax()">
+                    <input type="text" id="f_pax_names" placeholder="Cth: Amir, Amri, Abdul" style="width: 75%;" oninput="updatePax()">
+                </div>
             </div>
 
             <hr style="margin: 15px 0;">
@@ -646,16 +652,16 @@
             </div>
 
             <div class="input-group">
-                <label>PIC Client Name (Untuk Sign Bawah)</label>
-                <input type="text" id="f_sign_client_name" oninput="update('v_sign_client_name', this.value)">
+                <label>PIC Client Name (Rujukan Sistem Sahaja)</label>
+                <input type="text" id="f_sign_client_name">
             </div>
             <div class="input-group">
-                <label>PIC Client Position (Untuk Sign Bawah)</label>
-                <input type="text" id="f_sign_client_pos" oninput="update('v_sign_client_pos', this.value)">
+                <label>PIC Client Position (Rujukan Sistem Sahaja)</label>
+                <input type="text" id="f_sign_client_pos">
             </div>
             <div class="input-group">
-                <label>PIC Client Phone (Untuk Sign Bawah)</label>
-                <input type="text" id="f_sign_client_phone" placeholder="Cth: 0123456789" oninput="update('v_sign_client_phone', this.value)">
+                <label>PIC Client Phone (Rujukan Sistem Sahaja)</label>
+                <input type="text" id="f_sign_client_phone" placeholder="Cth: 0123456789">
             </div>
 
             <div class="input-group">
@@ -765,7 +771,7 @@
                 </div>
 
                 <div class="section-box">
-                    <div class="section-title">Remark / Comment</div>
+                    <div class="section-title">Manpower / Pax</div>
                     <div class="content-box small" id="v_remark"></div>
                 </div>
 
@@ -892,7 +898,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw51fpXWpPHpYOBIDQcxu2vpq0896wm2oApIdldsq9hcc-83q4qLncBnh97jRLxgmFF7g/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwAbhBbVC4V_FaLJJmGGVVIj7ZbyXNiJBZ1DTwKEsLL_R4SlyY1FBSpDUaYEyJeq0Em7w/exec"; 
 
         // ==========================================
         // TECH LOADER FUNCTIONS
@@ -1007,6 +1013,77 @@
             return jobs.length > 0 ? jobs : [{desc: '', remark: ''}];
         }
 
+        // ==========================================
+        // FUNGSI TARIKH MASA DATETIME CUSTOM
+        // ==========================================
+        function formatDateTimeCustom(isoString) {
+            if (!isoString) return '';
+            const d = new Date(isoString);
+            if (isNaN(d.getTime())) return isoString;
+            const day = d.getDate();
+            const month = d.getMonth() + 1;
+            const year = d.getFullYear();
+            let hours = d.getHours();
+            const mins = ("0" + d.getMinutes()).slice(-2);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            const hoursStr = ("0" + hours).slice(-2);
+            return `${day}/${month}/${year} ; ${hoursStr}:${mins} ${ampm}`;
+        }
+
+        function parseCustomToDateTimeLocal(str) {
+            if (!str) return '';
+            try {
+                const parts = str.split(';');
+                if (parts.length !== 2) return str; 
+                const dateParts = parts[0].trim().split('/');
+                const timeParts = parts[1].trim().split(' ');
+                if (dateParts.length !== 3 || timeParts.length !== 2) return '';
+                
+                const day = ("0" + dateParts[0]).slice(-2);
+                const month = ("0" + dateParts[1]).slice(-2);
+                const year = dateParts[2];
+                
+                const hm = timeParts[0].split(':');
+                let h = parseInt(hm[0], 10);
+                const m = hm[1];
+                const ampm = timeParts[1].toUpperCase();
+                
+                if (ampm === 'PM' && h < 12) h += 12;
+                if (ampm === 'AM' && h === 12) h = 0;
+                const hStr = ("0" + h).slice(-2);
+                
+                return `${year}-${month}-${day}T${hStr}:${m}`;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function updateTimeIO(type) {
+            const inputId = type === 'in' ? 'f_in' : 'f_out';
+            const targetId = type === 'in' ? 'v_in' : 'v_out';
+            const val = document.getElementById(inputId).value;
+            const formatted = formatDateTimeCustom(val);
+            document.getElementById(targetId).innerText = formatted;
+        }
+
+        // ==========================================
+        // FUNGSI MANPOWER / PAX (GANTI REMARK)
+        // ==========================================
+        function updatePax() {
+            const count = document.getElementById('f_pax_count').value;
+            const names = document.getElementById('f_pax_names').value;
+            let result = '';
+            
+            if(count) result += `${count} pax`;
+            if(count && names) result += ' - ';
+            if(!count && names) result += names; 
+            if(count && names) result += names;  
+            
+            document.getElementById('v_remark').innerText = result;
+        }
+
 
         // ==========================================
         // FUNGSI AUTO-COPY PIC CLIENT
@@ -1026,8 +1103,6 @@
             if (isChecked) {
                 signNameInput.value = nameInput;
                 signPhoneInput.value = phoneInput;
-                update('v_sign_client_name', nameInput);
-                update('v_sign_client_phone', phoneInput);
             }
         }
 
@@ -1162,6 +1237,17 @@
             setFieldValue('f_sign_client_pos', dataObj.signClientPos);
             setFieldValue('f_sign_client_phone', dataObj.signClientPhone);
 
+            // Time In / Time Out
+            document.getElementById('f_in').value = parseCustomToDateTimeLocal(dataObj.timeIn) || dataObj.timeIn || '';
+            document.getElementById('f_out').value = parseCustomToDateTimeLocal(dataObj.timeOut) || dataObj.timeOut || '';
+            updateTimeIO('in');
+            updateTimeIO('out');
+
+            // Issues & Staff info (Jika Staf tarik draf untuk sambung kerja)
+            setFieldValue('f_issue', dataObj.issue);
+            setFieldValue('f_staff_name', dataObj.staffName);
+            setFieldValue('f_staff_pos', dataObj.staffPos);
+
             // Paparkan kembali text combine ke bentuk jadual dynamik
             if (dataObj.jobDesc) {
                 jobDescriptions = parseJobDescString(dataObj.jobDesc);
@@ -1169,6 +1255,23 @@
                 jobDescriptions = [{desc: '', remark: ''}];
             }
             renderJobDescEditor();
+
+            // Kembalikan maklumat PAX / Manpower
+            const remarksStr = dataObj.remarks || '';
+            let paxCount = '';
+            let paxNames = '';
+            if (remarksStr.includes(' pax - ')) {
+                const parts = remarksStr.split(' pax - ');
+                paxCount = parts[0];
+                paxNames = parts[1];
+            } else if (remarksStr.includes(' pax')) {
+                paxCount = remarksStr.replace(' pax', '');
+            } else {
+                paxNames = remarksStr;
+            }
+            document.getElementById('f_pax_count').value = paxCount;
+            document.getElementById('f_pax_names').value = paxNames;
+            updatePax();
 
             currentStaffToken = dataObj.staffToken; 
 
@@ -1198,7 +1301,14 @@
                 signClientName: document.getElementById('f_sign_client_name').value,
                 signClientPos: document.getElementById('f_sign_client_pos').value,
                 signClientPhone: document.getElementById('f_sign_client_phone').value,
-                jobDesc: getCombinedJobDescString() // Gunakan fungsi Combine Data 
+                
+                timeIn: document.getElementById('v_in').innerText || '', 
+                timeOut: document.getElementById('v_out').innerText || '',
+                jobDesc: getCombinedJobDescString(), 
+                issue: document.getElementById('f_issue').value || '',
+                remarks: document.getElementById('v_remark').innerText || '', // Menghantar gabungan pax
+                staffName: document.getElementById('f_staff_name').value || '',
+                staffPosition: document.getElementById('f_staff_pos').value || ''
             };
 
             if (!payload.po) {
@@ -1580,16 +1690,18 @@
                     clientCompany: document.getElementById('f_client').value || '',
                     title: document.getElementById('f_title').value || '',
                     location: document.getElementById('f_loc').value || '',
-                    timeIn: document.getElementById('f_in').value || '',
-                    timeOut: document.getElementById('f_out').value || '',
+                    
+                    timeIn: document.getElementById('v_in').innerText || '',    // Nilai Time In berformat
+                    timeOut: document.getElementById('v_out').innerText || '',  // Nilai Time Out berformat
+                    
                     picName: document.getElementById('f_pic_name').value || '',
                     picPhone: document.getElementById('f_pic_phone').value || '',
                     signClientName: document.getElementById('f_sign_client_name').value || '',
                     signClientPos: document.getElementById('f_sign_client_pos').value || '',
                     signClientPhone: document.getElementById('f_sign_client_phone').value || '',
-                    jobDesc: getCombinedJobDescString(), // Gunakan fungsi combine data terbaru
+                    jobDesc: getCombinedJobDescString(), 
                     issue: document.getElementById('f_issue').value || '',
-                    remarks: document.getElementById('f_remark').value || '',
+                    remarks: document.getElementById('v_remark').innerText || '', // Manpower pax yang sudah digabung
                     staffName: document.getElementById('f_staff_name').value || '',
                     staffPosition: document.getElementById('f_staff_pos').value || '',
                     staffSignatureBase64: staffSigBase64,
