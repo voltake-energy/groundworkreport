@@ -496,7 +496,8 @@
             <h2>Log Masuk Sistem Voltake</h2>
             <select id="loginRole">
                 <option value="manager">Manager</option>
-                <option value="staff">Staf</option>
+                <option value="engineer">Engineer / Chargeman</option>
+                <option value="technician">Technician</option>
             </select>
             <input type="password" id="loginPassword" placeholder="Kata Laluan" onkeypress="if(event.key === 'Enter') checkLogin()">
             <p id="loginError" style="color:red; font-size:12px; display:none; margin-top:-10px; margin-bottom:10px;">Kata laluan salah!</p>
@@ -631,9 +632,9 @@
 
             <!-- IMAGE UPLOAD -->
             <div class="input-group" style="background: #e8f6f3; padding: 10px; border-radius: 4px;">
-                <label style="color:#16a085;">📸 Upload Gambar (Max 6)</label>
+                <label style="color:#16a085;">📸 Upload Gambar (Tiada Had)</label>
                 <input type="file" id="imageInput" accept="image/*" multiple onchange="handleImageUpload(this)">
-                <p style="font-size:10px; color:#7f8c8d; margin-top:5px;">Pilih sehingga 6 gambar. Tambah nota pada gambar yang dimuat naik di bawah.</p>
+                <p style="font-size:10px; color:#7f8c8d; margin-top:5px;">Pilih gambar. Muka surat tambahan akan dijana secara automatik untuk setiap 6 gambar dimuat naik.</p>
                 
                 <div id="editorImageList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
                 
@@ -653,29 +654,29 @@
 
             <div class="input-group">
                 <label>PIC Client Name (Rujukan Sistem Sahaja)</label>
-                <input type="text" id="f_sign_client_name">
+                <input type="text" id="f_sign_client_name" oninput="update('v_sign_client_name', this.value)">
             </div>
             <div class="input-group">
                 <label>PIC Client Position (Rujukan Sistem Sahaja)</label>
-                <input type="text" id="f_sign_client_pos">
+                <input type="text" id="f_sign_client_pos" oninput="update('v_sign_client_pos', this.value)">
             </div>
             <div class="input-group">
                 <label>PIC Client Phone (Rujukan Sistem Sahaja)</label>
-                <input type="text" id="f_sign_client_phone" placeholder="Cth: 0123456789">
+                <input type="text" id="f_sign_client_phone" placeholder="Cth: 0123456789" oninput="update('v_sign_client_phone', this.value)">
             </div>
 
             <div class="input-group">
-                <label>PIC Staff Name</label>
+                <label>PIC Technician / Staff Name</label>
                 <input type="text" id="f_staff_name" oninput="update('v_staff_name', this.value)">
             </div>
             <div class="input-group">
-                <label>PIC Staff Position</label>
+                <label>PIC Technician / Staff Position</label>
                 <input type="text" id="f_staff_pos" oninput="update('v_staff_pos', this.value)">
             </div>
 
             <!-- CANVAS TANDATANGAN STAF -->
             <div class="input-group" style="background: #ecf0f1; padding: 10px; border-radius: 4px; border: 1px solid #bdc3c7;">
-                <label style="color:#2c3e50;">✍️ Tandatangan Staf Di Sini</label>
+                <label style="color:#2c3e50;">✍️ Tandatangan Technician Di Sini</label>
                 <div style="background: white; border: 1px solid #ccc; border-radius: 4px; overflow:hidden;">
                     <canvas id="staffCanvas" style="width: 100%; height: 120px; cursor: crosshair; touch-action: none;"></canvas>
                 </div>
@@ -685,7 +686,7 @@
 
             <button id="btnSaveDraft" class="print-btn btn-save-draft" onclick="saveDraftToSystem()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                Simpan Data (Untuk Disambung Staf)
+                Simpan Data (Untuk Disambung Technician)
             </button>
 
             <button id="submitSystemBtn" class="print-btn" style="background-color: #27ae60;" onclick="submitToSystem()">
@@ -750,7 +751,6 @@
                     </div>
                 </div>
 
-                <!-- DIKEMASKINI: HEADER REMARK DAN GARISAN PEMISAH -->
                 <div class="section-box" style="overflow: hidden; margin-bottom: 10px;">
                     <table class="job-table">
                         <thead>
@@ -777,70 +777,11 @@
 
                 <div class="page-footer">
                     <div>© 2026 All Right Reserved by <span class="Voltake-btn">Voltake</span></div>
-                    <div>Page 1 of 3</div>
+                    <div id="page1-footer">Page 1 of 3</div>
                 </div>
             </div>
 
-            <!-- PAGE 2: IMAGES -->
-            <div class="a4-page">
-                <div class="report-header">
-                    <div class="logo-container">
-                        <img src="https://i.postimg.cc/nL1yRcWv/energy-services.png" alt="Voltake Logo" crossorigin="anonymous">
-                    </div>
-                    <div class="company-info">
-                        <div class="company-name">Voltake Energy</div>
-                        <div class="company-reg">201801008831 (1270845-X)</div>
-                        <div class="contact-row">
-                            <svg class="contact-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                            <span>+604-5823617</span>
-                        </div>
-                        <div class="contact-row">
-                            <svg class="contact-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span>admin@voltake.com</span>
-                        </div>
-                        <div class="contact-row">
-                            <svg class="contact-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                            <span>www.voltake.com</span>
-                        </div>
-                    </div>
-                </div>
-
-                <h1 class="report-title">Site Photos / Lampiran Gambar</h1>
-
-                <div class="photo-grid" id="photo-preview-grid">
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                    <div class="photo-slot">
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    </div>
-                </div>
-
-                <div class="page-footer">
-                    <div>© 2026 All Right Reserved by <span class="Voltake-btn">Voltake</span></div>
-                    <div>Page 2 of 3</div>
-                </div>
-            </div>
-
-            <!-- PAGE 3: SIGNATURES -->
+            <!-- PAGE 2: SIGNATURES -->
             <div class="a4-page">
                 <div class="report-header">
                     <div class="logo-container">
@@ -879,7 +820,7 @@
 
                         <div class="sig-col">
                             <div class="sig-title">PIC STAFF</div>
-                            <div class="sig-box" id="preview-staff-sig">(Tandatangan Staf)</div>
+                            <div class="sig-box" id="preview-staff-sig">(Tandatangan Technician)</div>
                             <div class="sig-row"><div class="sig-label">Name:</div><div class="field-value" id="v_staff_name" style="border-bottom:1px solid #ccc;"></div></div>
                             <div class="sig-row"><div class="sig-label">Position:</div><div class="field-value" id="v_staff_pos" style="border-bottom:1px solid #ccc;"></div></div>
                             <div class="sig-row"><div class="sig-label">Date:</div><div class="field-value" id="v_sign_date2" style="border-bottom:1px solid #ccc;"></div></div>
@@ -889,8 +830,13 @@
 
                 <div class="page-footer">
                     <div>© 2026 All Right Reserved by <span class="Voltake-btn">Voltake</span></div>
-                    <div>Page 3 of 3</div>
+                    <div id="page2-footer">Page 2 of 3</div>
                 </div>
+            </div>
+
+            <!-- CONTAINER DINAMIK UNTUK MUKA SURAT GAMBAR -->
+            <div id="dynamic-image-pages-container">
+                <!-- Javascript akan masukkan page gambar di sini -->
             </div>
             
         </div>
@@ -898,7 +844,32 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwAbhBbVC4V_FaLJJmGGVVIj7ZbyXNiJBZ1DTwKEsLL_R4SlyY1FBSpDUaYEyJeq0Em7w/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4HE5gdA1caL02qidq8nC5MOo93Xk_z3SdiE3zYWwgkeYyXafEr4xzohUWzKnbiwaLdA/exec"; 
+
+        // Header Statik untuk dipinjam masuk ke dalam mukasurat gambar dinamik
+        const templateHeaderHTML = `
+            <div class="report-header">
+                <div class="logo-container">
+                    <img src="https://i.postimg.cc/nL1yRcWv/energy-services.png" alt="Voltake Logo" crossorigin="anonymous">
+                </div>
+                <div class="company-info">
+                    <div class="company-name">Voltake Energy</div>
+                    <div class="company-reg">201801008831 (1270845-X)</div>
+                    <div class="contact-row">
+                        <svg class="contact-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        <span>+604-5823617</span>
+                    </div>
+                    <div class="contact-row">
+                        <svg class="contact-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <span>admin@voltake.com</span>
+                    </div>
+                    <div class="contact-row">
+                        <svg class="contact-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        <span>www.voltake.com</span>
+                    </div>
+                </div>
+            </div>
+        `;
 
         // ==========================================
         // TECH LOADER FUNCTIONS
@@ -913,7 +884,8 @@
 
         window.addEventListener('load', () => {
             showTechLoader("SYSTEM BOOTING...");
-            renderJobDescEditor(); // Initiate Dynamic Job Description Form
+            renderJobDescEditor(); 
+            renderImages(); // Panggil initial render supaya minimum 1 page gambar kosong terhasil
             setTimeout(() => { hideTechLoader(); }, 1500);
         });
 
@@ -976,32 +948,29 @@
             previewContainer.innerHTML = html;
         }
 
-        // Gabungkan untuk hantar ke Google Sheets supaya tersusun dalam 1 cell text
         function getCombinedJobDescString() {
             return jobDescriptions.map(job => {
                 if (!job.desc && !job.remark) return '';
                 let text = job.desc;
                 if (job.remark) {
                     if (text.includes('\n')) {
-                        // Kalau ada banyak line, letak remark di line terakhir bersama penjarakan
                         let lines = text.split('\n');
-                        lines[lines.length - 1] += `        ${job.remark}`; // Menggunakan 8 ruang jarak
+                        lines[lines.length - 1] += `        ${job.remark}`;
                         text = lines.join('\n');
                     } else {
-                        text += `        ${job.remark}`; // Menggunakan 8 ruang jarak
+                        text += `        ${job.remark}`; 
                     }
                 }
                 return text;
             }).filter(Boolean).join('\n\n');
         }
 
-        // Parse kembali dari Google Sheets string ke array objek input semasa fungsi Load
         function parseJobDescString(str) {
             if (!str) return [{desc: '', remark: ''}];
             let jobs = [];
             let blocks = str.split(/\n\n+/);
             blocks.forEach(block => {
-                let parts = block.split(/ {4,}/); // Pecahkan jika ada 4 jarak lebih
+                let parts = block.split(/ {4,}/);
                 if (parts.length > 1) {
                     let remark = parts.pop().trim();
                     let desc = parts.join('    ').trim();
@@ -1069,7 +1038,7 @@
         }
 
         // ==========================================
-        // FUNGSI MANPOWER / PAX (GANTI REMARK)
+        // FUNGSI MANPOWER / PAX
         // ==========================================
         function updatePax() {
             const count = document.getElementById('f_pax_count').value;
@@ -1083,7 +1052,6 @@
             
             document.getElementById('v_remark').innerText = result;
         }
-
 
         // ==========================================
         // FUNGSI AUTO-COPY PIC CLIENT
@@ -1103,6 +1071,8 @@
             if (isChecked) {
                 signNameInput.value = nameInput;
                 signPhoneInput.value = phoneInput;
+                update('v_sign_client_name', nameInput);
+                update('v_sign_client_phone', phoneInput);
             }
         }
 
@@ -1111,10 +1081,13 @@
             const pass = document.getElementById('loginPassword').value;
             const errorMsg = document.getElementById('loginError');
             
+            // Logik Pengesahan Password Baharu
             if (role === 'manager' && pass === 'manager123#') {
                 currentRole = 'manager';
-            } else if (role === 'staff' && pass === 'staf123#') {
-                currentRole = 'staff';
+            } else if (role === 'engineer' && pass === 'eng123#') {
+                currentRole = 'engineer';
+            } else if (role === 'technician' && pass === 'tech123#') {
+                currentRole = 'technician';
             } else {
                 errorMsg.style.display = 'block';
                 return;
@@ -1123,7 +1096,6 @@
             errorMsg.style.display = 'none';
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('formContentWrapper').style.display = 'block';
-            document.getElementById('roleDisplay').innerText = role;
             
             applyRoleUI();
             
@@ -1146,24 +1118,36 @@
             const btnSaveDraft = document.getElementById('btnSaveDraft');
             const poSearchArea = document.getElementById('poSearchArea');
             const btnDashboard = document.getElementById('btnDashboard');
+            const roleDisplay = document.getElementById('roleDisplay');
 
-            if (currentRole === 'manager') {
+            // Manager dan Engineer ada akses penuh (seperti Manager sebelum ini)
+            if (currentRole === 'manager' || currentRole === 'engineer') {
                 managerInputs.forEach(input => input.disabled = false);
                 btnSaveDraft.style.display = 'flex';
                 poSearchArea.style.display = 'block';
-                btnDashboard.style.display = 'flex';
-                document.getElementById('roleDisplay').style.background = '#f1c40f';
-            } else if (currentRole === 'staff') {
+                btnDashboard.style.display = 'flex'; // Akses ke Dashboard dibenarkan
+                
+                if (currentRole === 'manager') {
+                    roleDisplay.style.background = '#f1c40f'; // Warna Emas/Kuning
+                    roleDisplay.innerText = 'Manager';
+                } else {
+                    roleDisplay.style.background = '#3498db'; // Warna Biru
+                    roleDisplay.innerText = 'Engineer';
+                }
+                
+            } else if (currentRole === 'technician') {
+                // Technician (dahulunya Staff) ada akses terhad
                 managerInputs.forEach(input => input.disabled = true);
-                btnSaveDraft.style.display = 'none';
+                btnSaveDraft.style.display = 'flex'; 
                 poSearchArea.style.display = 'block';
-                btnDashboard.style.display = 'none';
-                document.getElementById('roleDisplay').style.background = '#2ecc71';
+                btnDashboard.style.display = 'none'; // Tiada akses ke Dashboard
+                roleDisplay.style.background = '#2ecc71'; // Warna Hijau
+                roleDisplay.innerText = 'Technician';
             }
         }
 
         // ==========================================
-        // FUNGSI CARI PO & LOAD DATA (MANAGER & STAF)
+        // FUNGSI CARI PO & LOAD DATA
         // ==========================================
         function searchPO() {
             const poInput = document.getElementById('searchPoInput').value.trim();
@@ -1243,12 +1227,10 @@
             updateTimeIO('in');
             updateTimeIO('out');
 
-            // Issues & Staff info (Jika Staf tarik draf untuk sambung kerja)
             setFieldValue('f_issue', dataObj.issue);
             setFieldValue('f_staff_name', dataObj.staffName);
             setFieldValue('f_staff_pos', dataObj.staffPos);
 
-            // Paparkan kembali text combine ke bentuk jadual dynamik
             if (dataObj.jobDesc) {
                 jobDescriptions = parseJobDescString(dataObj.jobDesc);
             } else {
@@ -1256,7 +1238,6 @@
             }
             renderJobDescEditor();
 
-            // Kembalikan maklumat PAX / Manpower
             const remarksStr = dataObj.remarks || '';
             let paxCount = '';
             let paxNames = '';
@@ -1273,6 +1254,20 @@
             document.getElementById('f_pax_names').value = paxNames;
             updatePax();
 
+            // PENTING: Baca data gambar dari Apps Script yang telah disimpan
+            uploadedImages = [];
+            if (dataObj.draftImages && dataObj.draftImages.length > 0) {
+                dataObj.draftImages.forEach(img => {
+                    uploadedImages.push({
+                        id: img.id,
+                        src: "https://lh3.googleusercontent.com/d/" + img.id,
+                        desc: img.desc
+                    });
+                });
+            }
+            renderEditorImages();
+            renderImages(); // Kemaskini pages dinamik
+
             currentStaffToken = dataObj.staffToken; 
 
             closePoModal();
@@ -1280,12 +1275,18 @@
         }
 
         // ==========================================
-        // FUNGSI SIMPAN DRAF (MANAGER)
+        // FUNGSI SIMPAN DRAF
         // ==========================================
         function saveDraftToSystem() {
             const btn = document.getElementById('btnSaveDraft');
             const msgBox = document.getElementById('systemMessage');
             
+            const payloadDraftImages = uploadedImages.map(img => ({
+                id: img.id || '', // Jika kosong, maknanya gambar baru nak di-upload
+                base64: img.src.startsWith('data:image') ? img.src : '', // Hantar jika base64
+                desc: img.desc
+            }));
+
             const payload = {
                 action: "save_draft",
                 staffToken: currentStaffToken,
@@ -1306,20 +1307,22 @@
                 timeOut: document.getElementById('v_out').innerText || '',
                 jobDesc: getCombinedJobDescString(), 
                 issue: document.getElementById('f_issue').value || '',
-                remarks: document.getElementById('v_remark').innerText || '', // Menghantar gabungan pax
+                remarks: document.getElementById('v_remark').innerText || '',
                 staffName: document.getElementById('f_staff_name').value || '',
-                staffPosition: document.getElementById('f_staff_pos').value || ''
+                staffPosition: document.getElementById('f_staff_pos').value || '',
+                
+                draftImages: payloadDraftImages
             };
 
             if (!payload.po) {
-                alert("Sila masukkan PO Number untuk rujukan carian staf nanti.");
+                alert("Sila masukkan PO Number untuk rujukan carian technician nanti.");
                 return;
             }
 
             btn.disabled = true;
             btn.innerHTML = 'Sedang Menyimpan...';
             msgBox.style.background = "#f1c40f";
-            msgBox.innerHTML = "Menghantar draf ke pangkalan data...";
+            msgBox.innerHTML = payloadDraftImages.length > 0 ? "Menghantar draf berserta gambar ke pangkalan data..." : "Menghantar draf ke pangkalan data...";
 
             showTechLoader("SAVING DATA TO CLOUD...");
 
@@ -1332,21 +1335,22 @@
                 hideTechLoader();
                 if(data.status === 'success') {
                     msgBox.style.background = "#d4edda";
-                    msgBox.innerHTML = `<span style="color:green;">Draf berjaya disimpan / dikemaskini! Maklumkan kepada Staf nombor PO: <b>${payload.po}</b></span>`;
+                    msgBox.innerHTML = `<span style="color:green;">Draf berjaya disimpan / dikemaskini! Maklumkan kepada Technician nombor PO: <b>${payload.po}</b></span>`;
                     if(data.staffToken) currentStaffToken = data.staffToken;
+                    
                 } else {
                     msgBox.style.background = "#f8d7da";
                     msgBox.innerHTML = `<span style="color:red;">Ralat: ${data.message}</span>`;
                 }
                 btn.disabled = false;
-                btn.innerHTML = 'Simpan Data (Untuk Disambung Staf)';
+                btn.innerHTML = 'Simpan Data (Untuk Disambung Technician)';
             })
             .catch(err => {
                 hideTechLoader();
                 msgBox.style.background = "#f8d7da";
                 msgBox.innerHTML = `<span style="color:red;">Ralat Network. Sila pastikan URL Web App tepat.</span>`;
                 btn.disabled = false;
-                btn.innerHTML = 'Simpan Data (Untuk Disambung Staf)';
+                btn.innerHTML = 'Simpan Data (Untuk Disambung Technician)';
             });
         }
 
@@ -1429,7 +1433,7 @@
         setTimeout(applyPreviewScale, 300);
 
         // ==========================================
-        // CANVAS TANDATANGAN STAF
+        // CANVAS TANDATANGAN TECHNICIAN
         // ==========================================
         const sCanvas = document.getElementById('staffCanvas');
         const sCtx = sCanvas.getContext('2d');
@@ -1469,7 +1473,7 @@
 
         function clearStaffCanvas() {
             sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
-            document.getElementById('preview-staff-sig').innerHTML = "(Tandatangan Staf)";
+            document.getElementById('preview-staff-sig').innerHTML = "(Tandatangan Technician)";
         }
 
         function updateStaffSigPreview() {
@@ -1480,27 +1484,23 @@
         }
 
         // ==========================================
-        // IMAGE UPLOAD DENGAN DESCRIPTION
+        // IMAGE UPLOAD (DINAMIK TANPA HAD & CHUNKING)
         // ==========================================
-        let uploadedImages = [];
+        let uploadedImages = []; // Format: { src: base64/URL, desc: string, id: string/null }
         
         function handleImageUpload(input) {
             const files = Array.from(input.files);
             if (!files.length) return;
-            const availableSlots = 6 - uploadedImages.length;
-            if (availableSlots <= 0) { alert("Maksimum 6 gambar telah dicapai."); input.value = ""; return; }
-            const filesToProcess = files.slice(0, availableSlots);
-            if (files.length > availableSlots) alert(`Hanya ${availableSlots} gambar ditambah.`);
-
+            
             let loadedCount = 0;
-            filesToProcess.forEach(file => {
+            files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    uploadedImages.push({ src: e.target.result, desc: '' });
+                    uploadedImages.push({ src: e.target.result, desc: '', id: null });
                     loadedCount++;
-                    if (loadedCount === filesToProcess.length) {
+                    if (loadedCount === files.length) {
                         renderEditorImages();
-                        renderImages();
+                        renderImages(); // Menjana muka surat mengikut gandaan 6
                     }
                 };
                 reader.readAsDataURL(file);
@@ -1515,7 +1515,7 @@
                 const div = document.createElement('div');
                 div.className = 'editor-image-item';
                 div.innerHTML = `
-                    <img src="${imgObj.src}">
+                    <img src="${imgObj.src}" crossorigin="anonymous">
                     <input type="text" placeholder="Nota gambar..." value="${imgObj.desc}" oninput="updateImageDesc(${index}, this.value)">
                     <button type="button" onclick="removeImage(${index})" title="Padam">X</button>
                 `;
@@ -1528,26 +1528,62 @@
             renderImages();
         }
 
+        // FUNGSI CHUNKING & PEMBINAAN MUKA SURAT GAMBAR DINAMIK
         function renderImages() {
-            const grid = document.getElementById('photo-preview-grid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 6; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'photo-slot';
-                if (uploadedImages[i]) {
-                    slot.innerHTML = `
-                        <div class="photo-img-wrapper">
-                            <img src="${uploadedImages[i].src}">
-                        </div>
-                        <div class="photo-desc-preview">${uploadedImages[i].desc || '- Tiada Nota -'}</div>
-                    `;
+            const container = document.getElementById('dynamic-image-pages-container');
+            container.innerHTML = ''; // Kosongkan container dahulu
+
+            // Kira jumlah muka surat gambar (minima 1 walaupun kosong)
+            const totalImagePages = Math.max(1, Math.ceil(uploadedImages.length / 6));
+            // Total Pages = 2 (Page 1 Details + Page 2 Signatures) + Page Gambar
+            const totalPages = 2 + totalImagePages;
+
+            // Update Pagination untuk Muka Surat 1 dan 2
+            document.getElementById('page1-footer').innerText = `Page 1 of ${totalPages}`;
+            document.getElementById('page2-footer').innerText = `Page 2 of ${totalPages}`;
+
+            // Gelung (Loop) untuk membina setiap muka surat gambar
+            for (let pageIndex = 0; pageIndex < totalImagePages; pageIndex++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'a4-page';
+
+                let gridHTML = '<div class="photo-grid">';
+                
+                if (uploadedImages.length === 0) {
+                    // Jika tiada gambar langsung, tunjukkan mesej kosong yang kemas
+                    gridHTML += `<div style="grid-column: span 2; text-align: center; color: #7f8c8d; padding-top: 50px; font-style: italic;">- Tiada lampiran gambar disertakan -</div>`;
                 } else {
-                    slot.innerHTML = `
-                        <div class="photo-img-wrapper"><div class="photo-placeholder">No Image</div></div>
-                        <div class="photo-desc-preview"></div>
-                    `;
+                    // Masukkan sehingga 6 gambar untuk page semasa
+                    for (let i = 0; i < 6; i++) {
+                        const imgIndex = (pageIndex * 6) + i;
+                        if (uploadedImages[imgIndex]) {
+                            gridHTML += `
+                                <div class="photo-slot">
+                                    <div class="photo-img-wrapper">
+                                        <img src="${uploadedImages[imgIndex].src}" crossorigin="anonymous">
+                                    </div>
+                                    <div class="photo-desc-preview">${uploadedImages[imgIndex].desc || '- Tiada Nota -'}</div>
+                                </div>
+                            `;
+                        } else {
+                            // Jika tak cukup 6, sediakan slot 'invisible' supaya grid maintain tapi nampak clean
+                            gridHTML += `<div style="border: none; background: transparent;"></div>`;
+                        }
+                    }
                 }
-                grid.appendChild(slot);
+                gridHTML += '</div>'; // Tutup grid gambar
+
+                // Set footer untuk muka surat gambar semasa (Page 3, Page 4, dan seterusnya)
+                const footerHTML = `
+                    <div class="page-footer">
+                        <div>© 2026 All Right Reserved by <span class="Voltake-btn">Voltake</span></div>
+                        <div>Page ${3 + pageIndex} of ${totalPages}</div>
+                    </div>
+                `;
+
+                // Cantumkan semula elemen ke dalam muka surat ini (Header + Tajuk + Grid + Footer)
+                pageDiv.innerHTML = templateHeaderHTML + '<h1 class="report-title">Site Photos / Lampiran Gambar</h1>' + gridHTML + footerHTML;
+                container.appendChild(pageDiv);
             }
             setTimeout(applyPreviewScale, 300);
         }
@@ -1691,8 +1727,8 @@
                     title: document.getElementById('f_title').value || '',
                     location: document.getElementById('f_loc').value || '',
                     
-                    timeIn: document.getElementById('v_in').innerText || '',    // Nilai Time In berformat
-                    timeOut: document.getElementById('v_out').innerText || '',  // Nilai Time Out berformat
+                    timeIn: document.getElementById('v_in').innerText || '',   
+                    timeOut: document.getElementById('v_out').innerText || '', 
                     
                     picName: document.getElementById('f_pic_name').value || '',
                     picPhone: document.getElementById('f_pic_phone').value || '',
@@ -1701,7 +1737,7 @@
                     signClientPhone: document.getElementById('f_sign_client_phone').value || '',
                     jobDesc: getCombinedJobDescString(), 
                     issue: document.getElementById('f_issue').value || '',
-                    remarks: document.getElementById('v_remark').innerText || '', // Manpower pax yang sudah digabung
+                    remarks: document.getElementById('v_remark').innerText || '',
                     staffName: document.getElementById('f_staff_name').value || '',
                     staffPosition: document.getElementById('f_staff_pos').value || '',
                     staffSignatureBase64: staffSigBase64,
