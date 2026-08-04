@@ -387,7 +387,7 @@
         }
         .modal-content {
             background: white; padding: 25px; border-radius: 8px;
-            width: 90%; max-width: 400px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%; max-width: 450px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .modal-content h2 { margin-bottom: 15px; color: #2c3e50; font-size: 18px; text-align: center; }
         .modal-content select, .modal-content input {
@@ -399,10 +399,10 @@
         .modal-content button:hover { background: #1a252f; }
         
         /* Table PO */
-        .po-table-container { max-height: 250px; overflow-y: auto; margin-top: 15px; }
+        .po-table-container { max-height: 300px; overflow-y: auto; margin-top: 15px; }
         .po-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .po-table th, .po-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .po-table th { background-color: #f2f2f2; position: sticky; top: 0; }
+        .po-table th, .po-table td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top;}
+        .po-table th { background-color: #f2f2f2; position: sticky; top: 0; z-index: 5;}
         .po-table tr:hover { background-color: #f9f9f9; }
         .btn-pick-po { background: #27ae60; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 10px; }
 
@@ -507,16 +507,16 @@
 
     <!-- 2. PO SEARCH MODAL -->
     <div id="poSearchModal" class="modal-overlay" style="display:none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2>Hasil Carian PO</h2>
-            <p style="font-size:12px; color:#555;">Sila pilih rekod dari senarai di bawah:</p>
+        <div class="modal-content">
+            <h2>Hasil Carian Draf & Pending</h2>
+            <p style="font-size:12px; color:#555; margin-bottom:10px;">Pilih rekod dari senarai di bawah, atau salin link kelulusan jika status adalah 'Pending'.</p>
             <div class="po-table-container">
                 <table class="po-table">
                     <thead>
                         <tr>
                             <th>Tarikh</th>
-                            <th>No. PO</th>
-                            <th>Klien</th>
+                            <th>No. PO / Klien</th>
+                            <th>Status</th>
                             <th>Tindakan</th>
                         </tr>
                     </thead>
@@ -550,9 +550,9 @@
             </a>
 
             <div id="poSearchArea" class="search-po-box">
-                <label style="font-size: 11px; font-weight: bold; color: #2c3e50; display:block; margin-bottom:5px;">Cari & Tarik Data Draf (Nombor PO)</label>
-                <input type="text" id="searchPoInput" placeholder="Masukkan No PO (Cth: PO-1001)">
-                <button id="btnSearchPo" onclick="searchPO()">Cari Maklumat Draf</button>
+                <label style="font-size: 11px; font-weight: bold; color: #2c3e50; display:block; margin-bottom:5px;">Cari Maklumat Draf & Pending</label>
+                <input type="text" id="searchPoInput" placeholder="Masukkan No PO (Biar kosong untuk papar semua)">
+                <button id="btnSearchPo" onclick="searchPO()">Cari Maklumat</button>
                 <div id="searchMsg" style="font-size: 10px; color: #e74c3c; margin-top: 5px; font-weight: bold;"></div>
             </div>
 
@@ -593,7 +593,7 @@
                 </div>
             </div>
 
-            <!-- Time In Out (DIKEMASKINI KE DATETIME) -->
+            <!-- Time In Out -->
             <div class="input-group">
                 <label>Time In (Tarikh & Masa)</label>
                 <input type="datetime-local" id="f_in" oninput="updateTimeIO('in')">
@@ -619,7 +619,7 @@
                 <textarea id="f_issue" rows="4" oninput="update('v_issue', this.value)"></textarea>
             </div>
             
-            <!-- MANPOWER / PAX (DIKEMASKINI DARI REMARKS) -->
+            <!-- MANPOWER / PAX -->
             <div class="input-group">
                 <label>Manpower (Berapa pax & Nama)</label>
                 <div style="display:flex; gap:5px;">
@@ -674,7 +674,7 @@
                 <input type="text" id="f_staff_pos" oninput="update('v_staff_pos', this.value)">
             </div>
 
-            <!-- CANVAS TANDATANGAN STAF -->
+            <!-- CANVAS TANDATANGAN TECHNICIAN -->
             <div class="input-group" style="background: #ecf0f1; padding: 10px; border-radius: 4px; border: 1px solid #bdc3c7;">
                 <label style="color:#2c3e50;">✍️ Tandatangan Technician Di Sini</label>
                 <div style="background: white; border: 1px solid #ccc; border-radius: 4px; overflow:hidden;">
@@ -844,7 +844,7 @@
 
     <!-- JAVASCRIPT -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby4HE5gdA1caL02qidq8nC5MOo93Xk_z3SdiE3zYWwgkeYyXafEr4xzohUWzKnbiwaLdA/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzMHq8G3ReoawXiaDQZryouP1kr8kDCqeL3obEbLDCsZRLz7XnkZ_yz_VoZ0DXrKwCNEQ/exec"; 
 
         // Header Statik untuk dipinjam masuk ke dalam mukasurat gambar dinamik
         const templateHeaderHTML = `
@@ -1096,6 +1096,7 @@
             errorMsg.style.display = 'none';
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('formContentWrapper').style.display = 'block';
+            document.getElementById('roleDisplay').innerText = role;
             
             applyRoleUI();
             
@@ -1120,15 +1121,15 @@
             const btnDashboard = document.getElementById('btnDashboard');
             const roleDisplay = document.getElementById('roleDisplay');
 
-            // Manager dan Engineer ada akses penuh (seperti Manager sebelum ini)
+            // Manager dan Engineer ada akses penuh
             if (currentRole === 'manager' || currentRole === 'engineer') {
                 managerInputs.forEach(input => input.disabled = false);
                 btnSaveDraft.style.display = 'flex';
                 poSearchArea.style.display = 'block';
-                btnDashboard.style.display = 'flex'; // Akses ke Dashboard dibenarkan
+                btnDashboard.style.display = 'flex'; // Akses ke Dashboard
                 
                 if (currentRole === 'manager') {
-                    roleDisplay.style.background = '#f1c40f'; // Warna Emas/Kuning
+                    roleDisplay.style.background = '#f1c40f'; // Warna Emas
                     roleDisplay.innerText = 'Manager';
                 } else {
                     roleDisplay.style.background = '#3498db'; // Warna Biru
@@ -1136,7 +1137,7 @@
                 }
                 
             } else if (currentRole === 'technician') {
-                // Technician (dahulunya Staff) ada akses terhad
+                // Technician ada akses terhad
                 managerInputs.forEach(input => input.disabled = true);
                 btnSaveDraft.style.display = 'flex'; 
                 poSearchArea.style.display = 'block';
@@ -1147,15 +1148,13 @@
         }
 
         // ==========================================
-        // FUNGSI CARI PO & LOAD DATA
+        // FUNGSI CARI PO & LOAD DATA (KEMASKINI)
         // ==========================================
         function searchPO() {
             const poInput = document.getElementById('searchPoInput').value.trim();
             const msgBox = document.getElementById('searchMsg');
-            if (!poInput) {
-                msgBox.innerText = "Sila masukkan nombor PO.";
-                return;
-            }
+            
+            // Sekatan dihapuskan. Membenarkan carian kosong untuk tarik semua draf dan pending.
 
             msgBox.innerText = "Sedang mencari data... Sila tunggu.";
             const btn = document.getElementById('btnSearchPo');
@@ -1175,7 +1174,7 @@
                 if (data.status === 'success') {
                     displayPoResults(data.data);
                 } else {
-                    msgBox.innerText = "Tiada rekod draf dijumpai untuk nombor PO ini.";
+                    msgBox.innerText = "Tiada rekod draf atau pending dijumpai.";
                 }
             })
             .catch(err => {
@@ -1185,6 +1184,17 @@
             });
         }
 
+        // Fungsi Salin Link Kelulusan
+        function copyApprovalLink(link) {
+            const el = document.createElement('textarea');
+            el.value = link;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert("Link kelulusan berjaya disalin!\nAnda kini boleh hantar link ini kepada klien.");
+        }
+
         function displayPoResults(results) {
             const tbody = document.getElementById('poTableBody');
             tbody.innerHTML = '';
@@ -1192,11 +1202,29 @@
             results.forEach((row) => {
                 const tr = document.createElement('tr');
                 const stringifiedData = JSON.stringify(row).replace(/'/g, "&#39;");
+                
+                let statusBadge = row.status === 'Pending'
+                    ? '<span style="background:#f39c12; color:#fff; padding:2px 5px; border-radius:3px; font-size:9px;">Pending</span>'
+                    : '<span style="background:#7f8c8d; color:#fff; padding:2px 5px; border-radius:3px; font-size:9px;">Draft</span>';
+
+                let actionBtns = `<button class="btn-pick-po" style="margin-bottom:2px;" onclick='loadDraftData(${stringifiedData})'>Pilih</button>`;
+
+                // Tambah butang Salin Link jika status adalah Pending
+                if (row.status === 'Pending' && row.approvalToken) {
+                    // Script URL perlu diakhiri dengan token untuk direct access
+                    // Disebabkan kita tahu format URL, kita hanya tambah ?token=
+                    const approvalLink = `${WEB_APP_URL}?token=${row.approvalToken}`;
+                    actionBtns += `<button style="background:#3498db; color:white; border:none; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:10px; display:block; margin-top:4px; width:max-content;" onclick="copyApprovalLink('${approvalLink}')">Salin Link</button>`;
+                }
+
                 tr.innerHTML = `
-                    <td>${row.date || ''}</td>
-                    <td>${row.po || ''}</td>
-                    <td>${row.client || ''}</td>
-                    <td><button class="btn-pick-po" onclick='loadDraftData(${stringifiedData})'>Pilih</button></td>
+                    <td>${row.date || '-'}</td>
+                    <td>
+                        <strong>${row.po || 'Tiada PO'}</strong><br>
+                        <span style="font-size:10px; color:#555;">${row.client || '-'}</span>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${actionBtns}</td>
                 `;
                 tbody.appendChild(tr);
             });
